@@ -1,99 +1,95 @@
 "use client";
 
-import { MessageSquare } from "lucide-react";
-import { useState } from "react";
-
-import { PageHeader } from "@/shared/components/page-header";
+import { useState, useMemo } from "react";
+import { InboxSidebar } from "./inbox-sidebar";
+import { ConversationList } from "./conversation-list";
+import { ChatThread } from "./chat-thread";
+import { ContextPanel } from "./context-panel";
+import { useConversations, type Conversation } from "../hooks/use-inbox";
 import { Button } from "@/shared/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/components/ui/card";
-import { Input } from "@/shared/components/ui/input";
-import { useUiStore } from "@/shared/stores/ui-store";
+import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { cn } from "@/lib/utils";
 
 export const InboxPage = () => {
-  const openSideSheet = useUiStore((state) => state.openSideSheet);
-  const [draft, setDraft] = useState("");
-  const [messages, setMessages] = useState<string[]>([]);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [isNavOpen, setIsNavOpen] = useState(true);
+  const { data, isLoading } = useConversations();
+
+  const conversations = data?.conversations || [];
+
+  const selectedConversation = useMemo(
+    () => conversations.find((c: Conversation) => c.id === selectedId),
+    [conversations, selectedId]
+  );
 
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="Inbox"
-        description="Centralized communications across guests, staff, and vendors."
-        eyebrow="Launch Critical"
-      />
-
-      <div className="grid gap-4 xl:grid-cols-[280px_1fr_320px]">
-        <Card className="h-[70vh]">
-          <CardHeader>
-            <CardTitle>Conversations</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">Conversation list will render from inbox query hooks.</p>
-          </CardContent>
-        </Card>
-
-        <Card className="h-[70vh]">
-          <CardHeader className="flex-row items-center justify-between">
-            <CardTitle>Thread</CardTitle>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() =>
-                openSideSheet({
-                  title: "Inbox Thread",
-                  description: "Thread details and approvals",
-                  view: "inbox-thread",
-                  width: 480,
-                })
-              }
-            >
-              <MessageSquare className="h-4 w-4" />
-              Open Panel
+    <div className="flex h-[calc(100vh-theme(spacing.16))] w-full flex-col">
+      {/* Dynamic Header */}
+      {!isNavOpen && (
+        <div className="flex shrink-0 items-center justify-between border-b px-4 py-3 h-[60px]">
+          <div className="flex justify-start gap-4 items-center">
+            <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground" onClick={() => setIsNavOpen(true)}>
+              <PanelLeftOpen className="h-5 w-5" />
             </Button>
-          </CardHeader>
-          <CardContent className="flex h-[calc(100%-5rem)] flex-col gap-4">
-            <div className="min-h-0 flex-1 space-y-2 overflow-y-auto rounded-xl border p-3">
-              {messages.length === 0 ? (
-                <p className="text-sm text-[hsl(var(--muted-foreground))]">No messages yet.</p>
-              ) : (
-                messages.map((message, index) => (
-                  <div key={`${message}-${index}`} className="rounded-lg bg-[hsl(var(--muted)/0.7)] px-3 py-2 text-sm">
-                    {message}
-                  </div>
-                ))
-              )}
-            </div>
-            <div className="flex gap-2">
-              <Input
-                aria-label="Message input"
-                placeholder="Type a message"
-                value={draft}
-                onChange={(event) => setDraft(event.target.value)}
-              />
-              <Button
-                onClick={() => {
-                  const next = draft.trim();
-                  if (next.length === 0) {
-                    return;
-                  }
-                  setMessages((prev) => [...prev, next]);
-                  setDraft("");
-                }}
-              >
-                Send
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
+            <h1 className="text-xl font-bold">Your Inbox</h1>
+          </div>
+        </div>
+      )}
 
-        <Card className="h-[70vh]">
-          <CardHeader>
-            <CardTitle>Context</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-[hsl(var(--muted-foreground))]">Property/task context cards will appear for active thread.</p>
-          </CardContent>
-        </Card>
+      <div className="flex flex-1 overflow-hidden bg-background">
+
+        {/* Leftmost Navigation Sidebar (Collapsible) */}
+        <div className={cn(
+          "shrink-0 border-r bg-background/50 flex flex-col transition-all duration-300 ease-in-out",
+          isNavOpen ? "w-[240px] opacity-100" : "w-0 opacity-0 overflow-hidden border-none"
+        )}>
+          {/* Internal Header when open */}
+          <div className="flex shrink-0 items-center justify-between border-b px-4 py-3 h-[60px] w-[240px]">
+            <h1 className="text-xl font-bold whitespace-nowrap">Your Inbox</h1>
+            <Button variant="ghost" size="icon" className="h-8 w-8 shrink-0 text-muted-foreground" onClick={() => setIsNavOpen(false)}>
+              <PanelLeftClose className="h-5 w-5" />
+            </Button>
+          </div>
+          {/* Scrollable sidebar content */}
+          <div className="flex-1 overflow-y-auto pr-2 w-[240px]">
+            <InboxSidebar />
+          </div>
+        </div>
+
+        {/* Dynamic Main Content Area */}
+        <div className="flex flex-1 overflow-hidden">
+          {selectedId && selectedConversation ? (
+            // 3-Column View (Narrow List + Thread + Context)
+            <>
+              <div className="w-[320px] shrink-0 border-r">
+                <ConversationList
+                  conversations={conversations}
+                  isLoading={isLoading}
+                  selectedId={selectedId}
+                  onSelect={setSelectedId}
+                  isNarrow={true}
+                />
+              </div>
+              <div className="flex flex-1 flex-col border-r bg-background">
+                <ChatThread conversation={selectedConversation} />
+              </div>
+              <div className="w-[340px] shrink-0 bg-background">
+                <ContextPanel conversation={selectedConversation} />
+              </div>
+            </>
+          ) : (
+            // 2-Column View (Wide List)
+            <div className="flex-1 p-6 bg-background overflow-y-auto">
+              <ConversationList
+                conversations={conversations}
+                isLoading={isLoading}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                isNarrow={false}
+              />
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
