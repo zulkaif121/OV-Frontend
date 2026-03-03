@@ -1,10 +1,11 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Moon, Search, Sparkles, Sun } from "lucide-react";
+import { Bell, ChevronDown, Palette, Search, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
 
 import type { AppRole } from "@/config/roles";
+import { appThemeOptions, defaultAppTheme, isAppTheme, type AppTheme } from "@/config/theme";
 import { Button } from "@/shared/components/ui/button";
 import { SidebarTrigger } from "@/shared/components/ui/sidebar";
 import { useUiStore } from "@/shared/stores/ui-store";
@@ -13,6 +14,8 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
@@ -26,6 +29,9 @@ interface HeaderProps {
 export const Header = ({ role, email }: HeaderProps) => {
   const { resolvedTheme, setTheme } = useTheme();
   const setCommandPaletteOpen = useUiStore((state) => state.setCommandPaletteOpen);
+  const themeValue = resolvedTheme ?? defaultAppTheme;
+  const activeTheme: AppTheme = isAppTheme(themeValue) ? themeValue : defaultAppTheme;
+  const activeThemeLabel = appThemeOptions.find((theme) => theme.value === activeTheme)?.label ?? "Theme";
 
   return (
     <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur-sm md:px-6 transition-all ease-linear shadow-sm">
@@ -75,15 +81,37 @@ export const Header = ({ role, email }: HeaderProps) => {
           </Link>
         </Button>
 
-        <Button 
-          variant="ghost" 
-          size="icon" 
-          className="h-9 w-9 text-muted-foreground hover:text-foreground hidden sm:inline-flex" 
-          onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}
-        >
-          {resolvedTheme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              className="h-9 gap-1.5 px-2 text-muted-foreground hover:text-foreground sm:gap-2 sm:px-3"
+            >
+              <Palette className="h-4 w-4" />
+              <span className="hidden text-xs font-medium sm:inline">{activeThemeLabel}</span>
+              <ChevronDown className="h-3.5 w-3.5 opacity-70" />
+              <span className="sr-only">Select theme</span>
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40">
+            <DropdownMenuLabel>Theme</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            <DropdownMenuRadioGroup
+              value={activeTheme}
+              onValueChange={(value) => {
+                if (isAppTheme(value)) {
+                  setTheme(value);
+                }
+              }}
+            >
+              {appThemeOptions.map((themeOption) => (
+                <DropdownMenuRadioItem key={themeOption.value} value={themeOption.value}>
+                  {themeOption.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
 
         <Button variant="ghost" size="icon" className="h-9 w-9 relative text-muted-foreground hover:text-foreground">
           <Bell className="h-4 w-4" />
@@ -116,9 +144,6 @@ export const Header = ({ role, email }: HeaderProps) => {
             <DropdownMenuSeparator />
             <DropdownMenuItem>Profile</DropdownMenuItem>
             <DropdownMenuItem>Settings</DropdownMenuItem>
-            <DropdownMenuItem className="sm:hidden" onClick={() => setTheme(resolvedTheme === "dark" ? "light" : "dark")}>
-              Toggle Theme
-            </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
                <Link href="/api/auth/signout" className="w-full cursor-pointer">Log out</Link>

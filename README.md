@@ -70,13 +70,20 @@ Optional per-request role override:
 - Open `http://localhost:3000/dashboard?role=OWNER`
 - Open `http://localhost:3000/dashboard?role=CLEANER`
 
-## Theme Color Switch
+## Theme Selection
 
-Change one line in `src/config/theme.ts`:
+- Header dropdown supports:
+  - `light`
+  - `dark`
+  - `cyan` (based on `#22d3ee` shades)
 
-- `activeColorScheme: "teal" | "gold" | "bronze"`
+- Theme options are centralized in `src/config/theme.ts`:
+  - `appThemes`
+  - `appThemeOptions`
+  - `defaultAppTheme`
 
-Light mode is the default theme.
+- Cyan theme variables live in `src/styles/globals.css` under `.cyan`.
+- `activeColorScheme: "teal" | "gold" | "bronze"` still controls optional accent overrides.
 
 ## Structure
 
