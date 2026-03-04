@@ -66,6 +66,16 @@
   --status-complete: 163 94% 24%;
   --status-critical: 0 74% 42%;
   --status-pending: 263 69% 42%;
+  --task-action-fg: var(--primary-foreground);
+  --task-action-bg-alpha: 1;
+  --task-action-border-alpha: 1;
+  --task-action-hover-alpha: 0.9;
+  --task-triage-icon-fg: var(--primary-foreground);
+  --task-triage-icon-bg-alpha: 1;
+  --task-triage-icon-border-alpha: 0;
+  --task-view-active-fg: var(--primary-foreground);
+  --task-view-active-bg-alpha: 1;
+  --task-view-active-border-alpha: 0;
 
   --accent-gold: 46 65% 52%;
   --accent-bronze: 30 61% 50%;
@@ -124,6 +134,16 @@
   --sidebar-accent-foreground: hsl(198 62% 24%);
   --sidebar-border: hsl(188 38% 82%);
   --sidebar-ring: hsl(188 84% 53%);
+  --task-action-fg: var(--primary-foreground);
+  --task-action-bg-alpha: 0.15;
+  --task-action-border-alpha: 0.3;
+  --task-action-hover-alpha: 0.25;
+  --task-triage-icon-fg: var(--primary-foreground);
+  --task-triage-icon-bg-alpha: 0.16;
+  --task-triage-icon-border-alpha: 0.38;
+  --task-view-active-fg: var(--primary-foreground);
+  --task-view-active-bg-alpha: 0.16;
+  --task-view-active-border-alpha: 0.38;
 }
 
 .dark {
@@ -157,6 +177,16 @@
   --sidebar-accent-foreground: hsl(240 4.8% 95.9%);
   --sidebar-border: hsl(240 3.7% 15.9%);
   --sidebar-ring: hsl(217.2 91.2% 59.8%);
+  --task-action-fg: var(--primary-foreground);
+  --task-action-bg-alpha: 0.15;
+  --task-action-border-alpha: 0.3;
+  --task-action-hover-alpha: 0.25;
+  --task-triage-icon-fg: var(--primary-foreground);
+  --task-triage-icon-bg-alpha: 0.22;
+  --task-triage-icon-border-alpha: 0.45;
+  --task-view-active-fg: var(--primary-foreground);
+  --task-view-active-bg-alpha: 0.22;
+  --task-view-active-border-alpha: 0.45;
 }
 
 .dark[data-color-scheme="gold"] {
@@ -181,6 +211,7 @@
   html,
   body {
     min-height: 100%;
+    overflow-x: hidden;
   }
 
   body {
@@ -194,6 +225,29 @@
 
 .animated-in {
   animation: animated-in 200ms ease-out;
+}
+
+.scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted-foreground) / 0.35) transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted-foreground) / 0.35);
+  border-radius: 999px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb:hover {
+  background-color: hsl(var(--muted-foreground) / 0.5);
 }
 
 @keyframes animated-in {

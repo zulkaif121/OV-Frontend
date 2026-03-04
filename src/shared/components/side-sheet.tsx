@@ -27,6 +27,7 @@ const TaskCreateFlow = () => {
       <div className="flex items-center gap-2">
         {stage === "draft" ? (
           <Button
+            className="border border-[hsl(var(--primary)/var(--task-action-border-alpha))] bg-[hsl(var(--primary)/var(--task-action-bg-alpha))] text-[hsl(var(--task-action-fg))] hover:bg-[hsl(var(--primary)/var(--task-action-hover-alpha))] hover:text-[hsl(var(--task-action-fg))]"
             onClick={() => {
               if (title.trim().length > 0) {
                 setStage("created");

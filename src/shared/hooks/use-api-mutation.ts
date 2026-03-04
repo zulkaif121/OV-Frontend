@@ -7,7 +7,7 @@ import type { ZodType } from "zod";
 import { createBrowserApiClient } from "@/lib/api/browser-client";
 import type { ApiClientError } from "@/lib/api/errors";
 
-interface UseApiMutationOptions<TData, TBody> {
+interface UseApiMutationOptions<TData> {
   path: string;
   schema: ZodType<TData>;
   method?: "POST" | "PUT" | "PATCH" | "DELETE";
@@ -17,7 +17,7 @@ export const useApiMutation = <TData, TBody = unknown>({
   path,
   schema,
   method = "POST",
-}: UseApiMutationOptions<TData, TBody>): UseMutationResult<TData, ApiClientError, TBody> => {
+}: UseApiMutationOptions<TData>): UseMutationResult<TData, ApiClientError, TBody> => {
   const apiClient = useMemo(() => createBrowserApiClient(), []);
 
   return useMutation<TData, ApiClientError, TBody>({

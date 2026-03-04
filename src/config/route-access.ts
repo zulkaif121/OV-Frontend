@@ -33,7 +33,10 @@ export const routeAccessRules: RouteAccessRule[] = [
   { prefix: "/assistant", roles: ["ASSISTANT"] },
   { prefix: "/cleaner", roles: ["CLEANER"] },
   { prefix: "/maintenance", roles: ["MAINTENANCE"] },
-  { prefix: "/vendor-portal", roles: ["MAINTENANCE"] },
+  { prefix: "/vendor-portal", roles: ["SUPERADMIN", "ADMIN", "MANAGER", "MAINTENANCE"] },
+  { prefix: "/sms-preview", roles: ["SUPERADMIN", "ADMIN", "MANAGER"] },
+  { prefix: "/feature-requests", roles: ["SUPERADMIN", "ADMIN", "MANAGER"] },
+  { prefix: "/help", roles: ["SUPERADMIN", "ADMIN", "MANAGER"] },
   { prefix: "/staff-mobile", roles: ["CLEANER", "MAINTENANCE"] },
 ];
 

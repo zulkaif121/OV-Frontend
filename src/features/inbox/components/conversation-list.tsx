@@ -1,4 +1,4 @@
-import { Search, SlidersHorizontal, ArrowDownUp, CheckCircle2, AlertCircle, ArrowLeft } from "lucide-react";
+import { Search, SlidersHorizontal, ArrowDownUp, AlertCircle, ArrowLeft } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
@@ -14,19 +14,21 @@ interface ConversationListProps {
     selectedId: string | null;
     onSelect: (id: string | null) => void;
     isNarrow?: boolean;
+    onBack?: () => void;
+    folderName?: string;
 }
 
-export const ConversationList = ({ conversations, isLoading, selectedId, onSelect, isNarrow }: ConversationListProps) => {
+export const ConversationList = ({ conversations, isLoading, selectedId, onSelect, isNarrow, onBack, folderName }: ConversationListProps) => {
     return (
         <div className={`flex h-full flex-col bg-background ${isNarrow ? 'border-r' : 'rounded-2xl border shadow-sm'}`}>
             <div className="flex items-center p-4">
                 {isNarrow && (
-                    <Button variant="ghost" size="icon" className="mr-2 h-8 w-8" onClick={() => onSelect(null)}>
+                    <Button variant="ghost" size="icon" className="mr-2 h-8 w-8" onClick={() => onBack?.()}>
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
                 )}
                 <div className="flex-1 px-2">
-                    <h2 className="text-xl font-semibold">{isNarrow ? "Guest" : "All Conversations"}</h2>
+                    <h2 className="text-xl font-semibold capitalize">{folderName || "All Conversations"}</h2>
                 </div>
                 {!isNarrow && (
                     <div className="flex max-w-sm flex-1 items-center gap-2">
@@ -45,18 +47,20 @@ export const ConversationList = ({ conversations, isLoading, selectedId, onSelec
             </div>
 
             <div className="flex items-center justify-between border-b px-4 py-2">
-                <Tabs defaultValue="todo" className="w-[400px]">
-                    <TabsList className="grid w-full grid-cols-3">
-                        <TabsTrigger value="todo">Todo</TabsTrigger>
-                        <TabsTrigger value="followup">Follow up</TabsTrigger>
-                        <TabsTrigger value="done">Done</TabsTrigger>
-                    </TabsList>
-                </Tabs>
                 {!isNarrow && (
-                    <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <button className="flex items-center gap-1 hover:text-foreground"><ArrowDownUp className="h-3 w-3" /> Sort by</button>
-                        <button className="flex items-center gap-1 hover:text-foreground"><SlidersHorizontal className="h-3 w-3" /> Filter</button>
-                    </div>
+                    <>
+                        <Tabs defaultValue="todo" className="w-[400px]">
+                            <TabsList className="grid w-full grid-cols-3">
+                                <TabsTrigger value="todo">Todo</TabsTrigger>
+                                <TabsTrigger value="followup">Follow up</TabsTrigger>
+                                <TabsTrigger value="done">Done</TabsTrigger>
+                            </TabsList>
+                        </Tabs>
+                        <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                            <button className="flex items-center gap-1 hover:text-foreground"><ArrowDownUp className="h-3 w-3" /> Sort by</button>
+                            <button className="flex items-center gap-1 hover:text-foreground"><SlidersHorizontal className="h-3 w-3" /> Filter</button>
+                        </div>
+                    </>
                 )}
             </div>
 
@@ -82,9 +86,9 @@ export const ConversationList = ({ conversations, isLoading, selectedId, onSelec
                                     onClick={() => onSelect(conv.id)}
                                     className={`flex cursor-pointer gap-4 p-4 transition-colors hover:bg-muted/50 ${isSelected ? 'bg-muted/50' : ''}`}
                                 >
-                                    <div className="relative">
-                                        <Avatar className="h-10 w-10">
-                                            <AvatarFallback className="bg-zinc-800 text-white">{initial}</AvatarFallback>
+                                    <div className="relative shrink-0">
+                                        <Avatar className="h-10 w-10 rounded-md">
+                                            <AvatarFallback className="bg-zinc-800 text-white rounded-md">{initial}</AvatarFallback>
                                         </Avatar>
                                         <div className="absolute -bottom-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-background">
                                             <div className="h-3 w-3 rounded-full bg-red-500" />

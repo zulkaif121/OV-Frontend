@@ -48,7 +48,7 @@ export const useConversationMessages = (conversationId: string | null) => {
 };
 
 export const useSendMessage = () => {
-    return useApiMutation<{ success: boolean; data_or_error?: any }, { conversation_id: string; content: string; channel?: string }>({
+    return useApiMutation<{ success: boolean; data_or_error?: unknown }, { conversation_id: string; content: string; channel?: string }>({
         method: "POST",
         path: "/api/v1/guest-inbox/outbound",
         schema: z.any(),

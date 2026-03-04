@@ -31,7 +31,7 @@ export const AppShell = ({ role, email, children }: AppShellProps) => {
       <Sidebar role={role} email={email} />
       <SidebarInset>
         <Header role={role} email={email} />
-        <main className="flex-1 overflow-y-auto px-4 py-6 md:px-6 lg:px-8">
+        <main className="flex-1 min-w-0 overflow-x-hidden overflow-y-auto px-4 py-6 md:px-6 lg:px-8">
           {children}
         </main>
       </SidebarInset>

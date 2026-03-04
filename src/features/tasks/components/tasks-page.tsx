@@ -4,7 +4,6 @@ import { useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import {
   Building2,
-  ChevronRight,
   ChevronUp,
   Clock3,
   ClipboardList,
@@ -15,15 +14,20 @@ import {
   Plus,
   Search,
   Sparkles,
-  TriangleAlert,
   Wrench,
-  Zap,
 } from "lucide-react";
 
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
+import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
+import { Card } from "@/shared/components/ui/card";
+import { Collapsible, CollapsibleContent } from "@/shared/components/ui/collapsible";
 import { Input } from "@/shared/components/ui/input";
+import { ScrollArea, ScrollBar } from "@/shared/components/ui/scroll-area";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
+import { ToggleGroup, ToggleGroupItem } from "@/shared/components/ui/toggle-group";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/components/ui/tooltip";
 import { useUiStore } from "@/shared/stores/ui-store";
 
 type ViewMode = "grid" | "list";
@@ -337,8 +341,6 @@ const boardColumns: BoardColumn[] = [
 const boardTaskCount = boardColumns.reduce((total, column) => total + column.tasks.length, 0);
 const taskPrimaryButtonClass =
   "border border-[hsl(var(--primary)/var(--task-action-border-alpha))] bg-[hsl(var(--primary)/var(--task-action-bg-alpha))] text-[hsl(var(--task-action-fg))] hover:bg-[hsl(var(--primary)/var(--task-action-hover-alpha))] hover:text-[hsl(var(--task-action-fg))]";
-const taskViewActiveClass =
-  "border border-[hsl(var(--primary)/var(--task-view-active-border-alpha))] bg-[hsl(var(--primary)/var(--task-view-active-bg-alpha))] text-[hsl(var(--task-view-active-fg))]";
 
 function TriageCard({ task }: { task: QueueTask }) {
   const openSideSheet = useUiStore((state) => state.openSideSheet);
@@ -351,172 +353,183 @@ function TriageCard({ task }: { task: QueueTask }) {
     : suppliesList[0] || "";
 
   return (
-    <article
+    <Card
       className={cn(
-        "flex flex-col rounded-xl border bg-background shadow-sm transition-all duration-300 cursor-pointer overflow-hidden relative",
-        "w-[340px] shrink-0",
+        "flex flex-col w-[340px] shrink-0 transition-all duration-300 overflow-hidden relative shadow-sm hover:shadow-md cursor-pointer",
         task.highlight ? "border-primary/30" : "border-border",
         isExpanded ? "h-auto" : "max-h-[300px]"
       )}
       onClick={() => setIsExpanded(!isExpanded)}
     >
-      <div className={cn("flex flex-1 flex-col p-4 md:p-5 gap-4", !isExpanded && "pb-16")}>
-        {/* Header Row */}
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <h3 className="truncate text-base font-semibold leading-tight text-foreground">
-              {task.title}
-            </h3>
-            <p className="mt-1 text-xs text-muted-foreground truncate">{task.property}</p>
+      <Collapsible open={isExpanded} onOpenChange={setIsExpanded} className="flex flex-1 flex-col">
+        <div className={cn("flex flex-1 flex-col p-4 md:p-5 gap-4", !isExpanded && "pb-16")}>
+          {/* Header Row */}
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0">
+              <h3 className="truncate text-base font-semibold leading-tight text-foreground">
+                {task.title}
+              </h3>
+              <p className="mt-1 text-xs text-muted-foreground truncate">{task.property}</p>
+            </div>
+            <div className="shrink-0 flex gap-1.5 flex-col items-end">
+              <Badge variant="outline" className={cn("px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold", queueToneClass[task.priorityTone])}>
+                {task.priorityLabel}
+              </Badge>
+            </div>
           </div>
-          <div className="shrink-0 flex gap-1.5 flex-col items-end">
-            <span className={cn("inline-flex rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider font-bold border", queueToneClass[task.priorityTone])}>
-              {task.priorityLabel}
-            </span>
+
+          {/* Status Row */}
+          <div className="flex flex-wrap gap-2">
+            <Badge variant="outline" className={cn("px-2 py-0.5 text-[10px] font-medium", queueToneClass[task.statusTone])}>
+              {task.statusLabel}
+            </Badge>
+            <Badge variant="outline" className="bg-primary/5 text-primary border-primary/20 px-2 py-0.5 text-[10px] font-medium">
+              <Sparkles className="mr-1 h-3 w-3" /> AI Detected
+            </Badge>
           </div>
-        </div>
 
-        {/* Status Row */}
-        <div className="flex flex-wrap gap-2">
-          <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-[10px] font-medium", queueToneClass[task.statusTone])}>
-            {task.statusLabel}
-          </span>
-          <span className="inline-flex rounded-full border bg-primary/5 text-primary border-primary/20 px-2 py-0.5 text-[10px] font-medium">
-            <Sparkles className="mr-1 h-3 w-3" /> AI Detected
-          </span>
-        </div>
+          {/* Summary Row */}
+          <TooltipProvider delayDuration={300}>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div className="rounded-xl border bg-muted/30 p-3">
+                  <p
+                    className={cn(
+                      "text-xs leading-5 text-muted-foreground transition-all duration-300",
+                      !isExpanded && "line-clamp-1"
+                    )}
+                  >
+                    {task.analysis}
+                  </p>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent side="bottom" align="start" className="max-w-[300px]">
+                <p className="text-xs">{task.analysis}</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
 
-        {/* Summary Row */}
-        <div className="rounded-xl border bg-muted/30 p-3">
-          <p
-            className={cn(
-              "text-xs leading-5 text-muted-foreground transition-all duration-300",
-              !isExpanded && "line-clamp-1"
-            )}
-            title={task.analysis}
-          >
-            {task.analysis}
-          </p>
-        </div>
-
-        {/* Assigned Cleaner Row */}
-        <div className="rounded-xl border bg-background px-3 py-2.5 flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-3">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <span className="inline-flex size-7 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                <Wrench className="h-3.5 w-3.5" />
-              </span>
-              <div className="min-w-0">
-                <p className="truncate text-xs font-semibold text-foreground">
-                  {task.assignee} <span className="text-muted-foreground font-normal mx-0.5">•</span> {task.price}
-                </p>
-                <p className="text-[10px] text-muted-foreground">{task.availability}</p>
+          {/* Assigned Cleaner Row */}
+          <div className="rounded-xl border bg-background px-3 py-2.5 flex flex-col gap-2">
+            <div className="flex items-center justify-between gap-3">
+              <div className="flex min-w-0 items-center gap-2.5">
+                <Avatar className="h-7 w-7">
+                  <AvatarFallback className="bg-muted text-muted-foreground">
+                    <Wrench className="h-3.5 w-3.5" />
+                  </AvatarFallback>
+                </Avatar>
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-semibold text-foreground">
+                    {task.assignee} <span className="text-muted-foreground font-normal mx-0.5">•</span> {task.price}
+                  </p>
+                  <p className="text-[10px] text-muted-foreground">{task.availability}</p>
+                </div>
               </div>
             </div>
+            <CollapsibleContent>
+              <div className="flex items-center justify-between border-t pt-2 mt-0.5" onClick={(e) => e.stopPropagation()}>
+                <p className="text-[10px] text-muted-foreground flex items-center gap-1">
+                  <CheckCircle2 className="h-3 w-3 text-emerald-500" />
+                  {task.reliability}
+                </p>
+                <button
+                  type="button"
+                  className="text-[10px] text-primary font-medium hover:underline"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    console.log("Change vendor");
+                  }}
+                >
+                  Change vendor
+                </button>
+              </div>
+            </CollapsibleContent>
           </div>
-          {isExpanded && (
-            <div className="flex items-center justify-between border-t pt-2 mt-0.5">
-              <p className="text-[10px] text-muted-foreground flex items-center gap-1">
-                <CheckCircle2 className="h-3 w-3 text-emerald-500" />
-                {task.reliability}
-              </p>
-              <button
-                type="button"
-                className="text-[10px] text-primary font-medium hover:underline"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  // Placeholder for change assignee
-                  console.log("Change assignee");
-                }}
-              >
-                Change vendor
-              </button>
+
+          {/* Supplies Row */}
+          {task.supplyLabel ? (
+            <div className="flex flex-col gap-2 rounded-xl border bg-background px-3 py-2.5">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-2 text-xs font-medium text-foreground">
+                  <Package className="h-3.5 w-3.5 text-muted-foreground" />
+                  Supplies
+                </span>
+                <Badge variant="secondary" className="px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                  {task.supplyState}
+                </Badge>
+              </div>
+
+              <CollapsibleContent>
+                <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside mt-1 ml-1">
+                  {suppliesList.map((item, i) => (
+                    <li key={i}>{item}</li>
+                  ))}
+                </ul>
+              </CollapsibleContent>
+              {!isExpanded ? (
+                <p className="text-xs text-muted-foreground ml-5 truncate">
+                  {collapsedSupplyText}
+                </p>
+              ) : null}
             </div>
-          )}
+          ) : null}
+        </div>
+      </Collapsible>
+
+      {/* Footer Row */}
+      <div
+        className={cn(
+          "flex items-center justify-between gap-3 border-t bg-background/95 backdrop-blur pt-3 px-4 md:px-5 pb-4",
+          isExpanded ? "mt-2 border-t" : "absolute bottom-0 left-0 right-0 w-full z-10"
+        )}
+      >
+        <div className="min-w-0 text-xs text-muted-foreground">
+          <div className="inline-flex items-center gap-1.5 font-medium text-foreground">
+            <Clock3 className="h-3.5 w-3.5" />
+            <span>{task.dueLabel}</span>
+          </div>
+          <span className="mt-0.5 block text-[10px]">{task.elapsed}</span>
         </div>
 
-        {/* Supplies Row */}
-        {task.supplyLabel ? (
-          <div className="flex flex-col gap-2 rounded-xl border bg-background px-3 py-2.5">
-            <div className="flex items-center justify-between">
-              <span className="inline-flex items-center gap-2 text-xs font-medium text-foreground">
-                <Package className="h-3.5 w-3.5 text-muted-foreground" />
-                Supplies
-              </span>
-              <span className="rounded-full border bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
-                {task.supplyState}
-              </span>
-            </div>
-
-            {isExpanded ? (
-              <ul className="text-xs text-muted-foreground space-y-1 list-disc list-inside mt-1 ml-1">
-                {suppliesList.map((item, i) => (
-                  <li key={i}>{item}</li>
-                ))}
-              </ul>
-            ) : (
-              <p className="text-xs text-muted-foreground ml-5 truncate">
-                {collapsedSupplyText}
-              </p>
-            )}
-          </div>
-        ) : null}
-
-        {/* Footer Row */}
-        <div
-          className={cn(
-            "flex items-center justify-between gap-3 border-t bg-background/95 backdrop-blur pt-3 px-4 md:px-5 pb-4",
-            isExpanded ? "mt-2 -mx-4 md:-mx-5 -mb-4 md:-mb-5 border-t" : "absolute bottom-0 left-0 right-0 w-full z-10"
-          )}
-        >
-          <div className="min-w-0 text-xs text-muted-foreground">
-            <div className="inline-flex items-center gap-1.5 font-medium text-foreground">
-              <Clock3 className="h-3.5 w-3.5" />
-              <span>{task.dueLabel}</span>
-            </div>
-            <span className="mt-0.5 block text-[10px]">{task.elapsed}</span>
-          </div>
-
-          <div className="flex items-center gap-2 shrink-0">
+        <div className="flex items-center gap-2 shrink-0">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8 text-xs px-3 hover:bg-muted"
+            onClick={(e) => {
+              e.stopPropagation();
+              openSideSheet({
+                title: task.title,
+                description: "Task detail panel",
+                view: "task-detail",
+                width: 480,
+                payload: { taskId: task.id },
+              });
+            }}
+          >
+            Details
+          </Button>
+          {task.action === "approve" ? (
             <Button
               size="sm"
-              variant="ghost"
-              className="h-8 text-xs px-3 hover:bg-muted"
+              className={cn("h-8 shrink-0 rounded-lg px-4 text-xs font-medium", taskPrimaryButtonClass)}
               onClick={(e) => {
                 e.stopPropagation();
                 openSideSheet({
-                  title: task.title,
-                  description: "Task detail panel",
-                  view: "task-detail",
+                  title: `Approve ${task.id}`,
+                  description: "Review and approve recommended task action.",
+                  view: "approval-panel",
                   width: 480,
                   payload: { taskId: task.id },
                 });
               }}
             >
-              Details
+              Approve
             </Button>
-            {task.action === "approve" ? (
-              <Button
-                size="sm"
-                className={cn("h-8 shrink-0 rounded-lg px-4 text-xs font-medium", taskPrimaryButtonClass)}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  openSideSheet({
-                    title: `Approve ${task.id}`,
-                    description: "Review and approve recommended task action.",
-                    view: "approval-panel",
-                    width: 480,
-                    payload: { taskId: task.id },
-                  });
-                }}
-              >
-                Approve
-              </Button>
-            ) : null}
-          </div>
+          ) : null}
         </div>
       </div>
-    </article>
+    </Card>
   );
 }
 
@@ -612,33 +625,20 @@ export const TasksPage = () => {
                 </label>
               </div>
 
-              <div className="inline-flex h-9 w-fit items-center rounded-lg bg-muted/40 p-1">
-                <button
-                  type="button"
-                  onClick={() => setViewMode("grid")}
-                  className={cn(
-                    "inline-flex h-7 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium transition-colors hover:bg-background/60 hover:text-foreground",
-                    viewMode === "grid"
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground",
-                  )}
-                  aria-label="Grid view"
+              <div className="flex items-center">
+                <ToggleGroup
+                  type="single"
+                  value={viewMode}
+                  onValueChange={(value) => { if (value) setViewMode(value as ViewMode) }}
+                  className="rounded-lg bg-muted/40 p-1"
                 >
-                  <LayoutGrid className="h-4 w-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setViewMode("list")}
-                  className={cn(
-                    "inline-flex h-7 items-center justify-center gap-2 rounded-md px-3 text-sm font-medium transition-colors hover:bg-background/60 hover:text-foreground",
-                    viewMode === "list"
-                      ? "bg-background text-foreground shadow-sm"
-                      : "text-muted-foreground",
-                  )}
-                  aria-label="List view"
-                >
-                  <List className="h-4 w-4" />
-                </button>
+                  <ToggleGroupItem value="grid" aria-label="Grid view" className="h-7 px-3 text-sm font-medium data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm">
+                    <LayoutGrid className="h-4 w-4" />
+                  </ToggleGroupItem>
+                  <ToggleGroupItem value="list" aria-label="List view" className="h-7 px-3 text-sm font-medium data-[state=on]:bg-background data-[state=on]:text-foreground data-[state=on]:shadow-sm">
+                    <List className="h-4 w-4" />
+                  </ToggleGroupItem>
+                </ToggleGroup>
               </div>
             </div>
           </div>
@@ -692,13 +692,14 @@ export const TasksPage = () => {
 
           {isTriageOpen ? (
             <div className="px-4 pb-6 md:px-6" id="ai-triage-cards">
-              <div className="overflow-x-auto scrollbar-thin pb-2">
-                <div className="flex min-w-max gap-4 p-2">
+              <ScrollArea className="w-full whitespace-nowrap pb-4">
+                <div className="flex w-max space-x-4 p-2">
                   {visibleTriageTasks.map((task) => (
                     <TriageCard key={task.id} task={task} />
                   ))}
                 </div>
-              </div>
+                <ScrollBar orientation="horizontal" />
+              </ScrollArea>
             </div>
           ) : null}
         </div>
@@ -717,8 +718,8 @@ export const TasksPage = () => {
           </header>
 
           {isBoardGrid ? (
-            <div className="w-full max-w-full overflow-x-auto pb-2 scrollbar-thin">
-              <div className="flex min-w-max gap-4 pb-2 pr-2">
+            <ScrollArea className="w-full whitespace-nowrap pb-4">
+              <div className="flex w-max space-x-4 pb-2 pr-2">
                 {boardColumns.map((column) => (
                   <section key={column.id} className="w-[320px] shrink-0 rounded-2xl border bg-muted/40 p-4">
                     <div className="mb-4 flex items-center justify-between gap-2">
@@ -739,10 +740,10 @@ export const TasksPage = () => {
                     </div>
 
                     {column.tasks.length > 0 ? (
-                      <div className="space-y-3">
+                      <div className="space-y-3 whitespace-normal">
                         {column.tasks.map((task) => (
-                          <article
-                            className="rounded-xl border bg-background p-4 shadow-sm transition-transform transition-shadow duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring)/0.4)]"
+                          <Card
+                            className="p-4 shadow-sm transition-transform transition-shadow duration-200 hover:-translate-y-0.5 hover:shadow-md cursor-pointer focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[hsl(var(--ring)/0.4)]"
                             key={task.id}
                             role="button"
                             tabIndex={0}
@@ -757,12 +758,12 @@ export const TasksPage = () => {
                             <h4 className="text-base font-semibold">{task.title}</h4>
                             <p className="mt-1 text-sm text-muted-foreground">{task.property}</p>
                             <div className="mt-4 flex items-center justify-between gap-2">
-                              <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-xs font-medium", boardPriorityClass[task.priorityTone])}>
+                              <Badge variant="outline" className={cn("px-2 py-0.5 text-[10px] font-medium", boardPriorityClass[task.priorityTone])}>
                                 {task.priority}
-                              </span>
+                              </Badge>
                               <span className="text-xs text-muted-foreground">{task.date}</span>
                             </div>
-                          </article>
+                          </Card>
                         ))}
                       </div>
                     ) : (
@@ -773,7 +774,8 @@ export const TasksPage = () => {
                   </section>
                 ))}
               </div>
-            </div>
+              <ScrollBar orientation="horizontal" />
+            </ScrollArea>
           ) : (
             <div className="space-y-3">
               {boardListItems.length > 0 ? (
@@ -790,13 +792,13 @@ export const TasksPage = () => {
                         <div className="min-w-0 space-y-1.5">
                           <div className="flex flex-wrap items-center gap-2">
                             {task.statusLabel && task.statusTone ? (
-                              <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-xs font-medium", boardStatusClass[task.statusTone])}>
+                              <Badge variant="outline" className={cn("px-2 py-0.5 text-[10px] font-medium", boardStatusClass[task.statusTone])}>
                                 {task.statusLabel}
-                              </span>
+                              </Badge>
                             ) : null}
-                            <span className={cn("inline-flex rounded-full border px-2 py-0.5 text-xs font-medium", boardPriorityClass[task.priorityTone])}>
+                            <Badge variant="outline" className={cn("px-2 py-0.5 text-[10px] font-medium", boardPriorityClass[task.priorityTone])}>
                               {task.priority}
-                            </span>
+                            </Badge>
                           </div>
                           <h4 className="text-base font-semibold">{task.title}</h4>
                           <p className="text-sm text-muted-foreground">{task.property}</p>
@@ -849,7 +851,7 @@ export const TasksPage = () => {
             </div>
           )}
         </div>
-      </section>
-    </div>
+      </section >
+    </div >
   );
 };

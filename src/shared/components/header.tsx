@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Bell, ChevronDown, Palette, Search, Sparkles } from "lucide-react";
 import { useTheme } from "next-themes";
+import { useEffect, useState } from "react";
 
 import type { AppRole } from "@/config/roles";
 import { appThemeOptions, defaultAppTheme, isAppTheme, type AppTheme } from "@/config/theme";
@@ -29,9 +30,17 @@ interface HeaderProps {
 export const Header = ({ role, email }: HeaderProps) => {
   const { resolvedTheme, setTheme } = useTheme();
   const setCommandPaletteOpen = useUiStore((state) => state.setCommandPaletteOpen);
-  const themeValue = resolvedTheme ?? defaultAppTheme;
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const themeValue = mounted ? (resolvedTheme ?? defaultAppTheme) : defaultAppTheme;
   const activeTheme: AppTheme = isAppTheme(themeValue) ? themeValue : defaultAppTheme;
-  const activeThemeLabel = appThemeOptions.find((theme) => theme.value === activeTheme)?.label ?? "Theme";
+  const activeThemeLabel = mounted
+    ? appThemeOptions.find((theme) => theme.value === activeTheme)?.label ?? "Theme"
+    : "Theme";
 
   return (
     <header className="sticky top-0 z-20 flex h-14 shrink-0 items-center justify-between border-b bg-background/95 px-4 backdrop-blur-sm md:px-6 transition-all ease-linear shadow-sm">

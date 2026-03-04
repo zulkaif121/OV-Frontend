@@ -1,8 +1,8 @@
 import { useState } from "react";
-import { Send, Phone, Languages, Book, LayoutPanelLeft } from "lucide-react";
+import { Phone, Languages, LayoutPanelLeft } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Avatar, AvatarFallback } from "@/shared/components/ui/avatar";
-import { ScrollArea } from "@/shared/components/ui/scroll-area";
+import { Textarea } from "@/shared/components/ui/textarea";
 import { useConversationMessages, useSendMessage, type Conversation, type Message } from "../hooks/use-inbox";
 
 export const ChatThread = ({ conversation }: { conversation: Conversation }) => {
@@ -48,34 +48,61 @@ export const ChatThread = ({ conversation }: { conversation: Conversation }) => 
                 <button className="flex items-center gap-1 hover:text-foreground">&gt;&gt; Teach AI K</button>
             </div>
 
-            <ScrollArea className="flex-1 p-6">
+            <div className="flex-1 overflow-y-auto p-6">
                 {isLoading ? (
                     <div className="py-8 text-center text-sm text-muted-foreground">Loading thread...</div>
                 ) : (
                     <div className="flex flex-col gap-6 pb-20">
-                        {messagesData?.messages?.map((msg: Message) => {
-                            const isUser = msg.direction === "outbound";
-                            return (
-                                <div key={msg.id} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
-                                    {!isUser && (
-                                        <Avatar className="mr-3 mt-1 h-8 w-8 shrink-0">
-                                            <AvatarFallback className="bg-zinc-800 text-xs text-white">{initial}</AvatarFallback>
-                                        </Avatar>
-                                    )}
-                                    <div className={`max-w-[75%] rounded-2xl px-5 py-3 text-sm ${isUser ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
-                                        <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                        {(!messagesData?.messages || messagesData.messages.length === 0) ? (
+                            // Mock messages if empty
+                            <>
+                                <div className="flex w-full justify-start">
+                                    <Avatar className="mr-3 mt-1 h-8 w-8 shrink-0">
+                                        <AvatarFallback className="bg-zinc-800 text-xs text-white">{initial}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="max-w-[75%] rounded-2xl px-5 py-3 text-sm bg-muted">
+                                        <p className="whitespace-pre-wrap leading-relaxed">Hi there! I was wondering if we could get an early check-in? Our flight arrives at 11 AM.</p>
                                     </div>
                                 </div>
-                            );
-                        })}
+                                <div className="flex w-full justify-end">
+                                    <div className="max-w-[75%] rounded-2xl px-5 py-3 text-sm bg-primary text-primary-foreground">
+                                        <p className="whitespace-pre-wrap leading-relaxed">Hello {name.split(' ')[0]}! Unfortunately, the previous guests are checking out at 11 AM, so we need time to clean the property. The earliest we can do is 2 PM.</p>
+                                    </div>
+                                </div>
+                                <div className="flex w-full justify-start">
+                                    <Avatar className="mr-3 mt-1 h-8 w-8 shrink-0">
+                                        <AvatarFallback className="bg-zinc-800 text-xs text-white">{initial}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="max-w-[75%] rounded-2xl px-5 py-3 text-sm bg-muted">
+                                        <p className="whitespace-pre-wrap leading-relaxed">No problem, that works for us. We&apos;ll grab some lunch in the meantime. Thank you!</p>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            messagesData.messages.map((msg: Message) => {
+                                const isUser = msg.direction === "outbound";
+                                return (
+                                    <div key={msg.id} className={`flex w-full ${isUser ? 'justify-end' : 'justify-start'}`}>
+                                        {!isUser && (
+                                            <Avatar className="mr-3 mt-1 h-8 w-8 shrink-0">
+                                                <AvatarFallback className="bg-zinc-800 text-xs text-white">{initial}</AvatarFallback>
+                                            </Avatar>
+                                        )}
+                                        <div className={`max-w-[75%] rounded-2xl px-5 py-3 text-sm ${isUser ? 'bg-primary text-primary-foreground' : 'bg-muted'}`}>
+                                            <p className="whitespace-pre-wrap leading-relaxed">{msg.content}</p>
+                                        </div>
+                                    </div>
+                                );
+                            })
+                        )}
                     </div>
                 )}
-            </ScrollArea>
+            </div>
 
             <div className="mt-auto border-t bg-background p-4">
                 <div className="relative overflow-hidden rounded-2xl border bg-background shadow-sm focus-within:ring-1 focus-within:ring-ring">
-                    <textarea
-                        className="w-full resize-none bg-transparent px-4 py-3 pb-12 text-sm outline-none placeholder:text-muted-foreground"
+                    <Textarea
+                        className="w-full resize-none bg-transparent px-4 py-3 pb-12 text-sm outline-none placeholder:text-muted-foreground border-none focus-visible:ring-0 shadow-none border-transparent ring-offset-transparent"
                         placeholder="Press R to reply"
                         rows={3}
                         value={draft}

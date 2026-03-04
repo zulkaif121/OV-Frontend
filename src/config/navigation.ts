@@ -46,34 +46,49 @@ export const navigationByRole: Record<AppRole, NavSection[]> = {
         { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { title: "Today", href: "/today", icon: Calendar },
         { title: "Inbox", href: "/inbox", icon: Inbox },
+        { title: "Calendar", href: "/calendar", icon: Calendar },
       ],
     },
     {
       label: "Operations",
       items: [
         { title: "Tasks", href: "/tasks", icon: ClipboardList },
+        { title: "Signals", href: "/signals", icon: Activity },
+        { title: "AI Triage", href: "/vendor-triage", icon: Wrench },
+        { title: "Ask AI", href: "/ai-copilot", icon: Sparkles },
         { title: "Properties", href: "/properties", icon: Building2 },
         { title: "Vendors", href: "/vendors", icon: Briefcase },
-        { title: "Signals", href: "/signals", icon: Activity },
-        { title: "Vendor Triage", href: "/vendor-triage", icon: Wrench },
+        { title: "Vendor Portal", href: "/vendor-portal", icon: Wrench },
+        { title: "SMS Preview", href: "/sms-preview", icon: MessageSquare },
+        { title: "Job Card", href: "/tracker", icon: Timer },
       ],
     },
     {
       label: "Intelligence",
       items: [
         { title: "Reports", href: "/reports", icon: FileClock },
-        { title: "Tracker", href: "/tracker", icon: Timer },
+        { title: "Supplies", href: "/supplies", icon: ShoppingBasket },
         { title: "Wiki", href: "/wiki", icon: BookOpen },
-        { title: "AI Copilot", href: "/ai-copilot", icon: Sparkles },
+        { title: "Guidebooks", href: "/guidebooks", icon: MessageSquare },
+      ],
+    },
+    {
+      label: "Finance",
+      items: [
+        { title: "Money", href: "/money", icon: BadgeDollarSign },
+        { title: "Upsells", href: "/upsells", icon: Bell },
+        { title: "Claims", href: "/claims", icon: HandCoins },
       ],
     },
     {
       label: "Platform",
       items: [
         { title: "Workflows", href: "/workflows", icon: FolderKanban },
+        { title: "Devices", href: "/smart-devices", icon: Compass },
         { title: "Integrations", href: "/integrations", icon: CircuitBoard },
-        { title: "Smart Devices", href: "/smart-devices", icon: Compass },
         { title: "Settings", href: "/settings", icon: Settings },
+        { title: "Feature Requests", href: "/feature-requests", icon: Bell },
+        { title: "Help", href: "/help", icon: BookOpen },
       ],
     },
   ],
@@ -83,6 +98,7 @@ export const navigationByRole: Record<AppRole, NavSection[]> = {
       items: [
         { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { title: "Today", href: "/today", icon: Calendar },
+        { title: "Calendar", href: "/calendar", icon: Calendar },
         { title: "Inbox", href: "/inbox", icon: Inbox },
       ],
     },
@@ -117,6 +133,7 @@ export const navigationByRole: Record<AppRole, NavSection[]> = {
       items: [
         { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
         { title: "Today", href: "/today", icon: Calendar },
+        { title: "Calendar", href: "/calendar", icon: Calendar },
         { title: "Inbox", href: "/inbox", icon: Inbox },
       ],
     },
@@ -151,6 +168,7 @@ export const navigationByRole: Record<AppRole, NavSection[]> = {
       items: [
         { title: "Assistant Hub", href: "/assistant", icon: UserCog },
         { title: "Today", href: "/today", icon: Calendar },
+        { title: "Calendar", href: "/calendar", icon: Calendar },
         { title: "Inbox", href: "/inbox", icon: Inbox },
         { title: "Tasks", href: "/tasks", icon: ClipboardList },
       ],
